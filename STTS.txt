@@ -1,0 +1,580 @@
+// ==UserScript==
+// @name         STTS TDC Made Easy
+// @namespace    https://coral.amazon.com/StationTestToolsService/
+// @version      2023.10
+// @description  Create Test Data @ Ease
+// @author       @hdavisvi
+// @match        https://coral.amazon.com/StationTestToolsService/*
+// ==/UserScript==
+
+(function() {
+    'use strict';
+    const inputDiv = document.createElement('div');
+    // Create an array of options for the dropdown list
+    inputDiv.innerHTML = `
+     <style>
+  .button {
+    margin-right: 10px;
+  }
+  .button2{
+  margin-right: 10px;
+  }
+.animated-input {
+  transition: transform 0.2s;
+  border: 2px solid #ccc;
+}
+
+.shake {
+  animation: shake 0.2s;
+  animation-iteration-count: 1;
+  border: 1px solid red;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+  20%, 40%, 60%, 80% { transform: translateX(10px); }
+}
+</style>
+           <label for="dropdown">Test Data type:</label>
+           <select id="testDataType-selection-dropdown">
+                <option selected="selected" value="Select Country">Select Data Type</option>
+                <option value="AFN">AFN</option>
+                <option value="Stubbing">Stubbing</option>
+                <option value="RTS/Depart">RTS/Depart</option>
+           </select>
+           <br>
+           <label for="dropdown">Country:</label>
+           <select id="country-selection-dropdown">
+                <option selected="selected" value="Select Country">Select Country</option>
+                <option value="US">US</option>
+                <option value="UK">UK</option>
+                <option value="IN">IN</option>
+           </select>
+           <br>
+           <label for="dropdown">Station:</label>
+           <select id="station-selection-dropdown">
+                <option selected="selected" value="Select Station">Select Station</option>
+                <option value="TST2">TST2</option>
+                <option value="TST3">TST3</option>
+                <option value="XYZ1">XYZ1</option>
+                <option value="TST1">TST1</option>
+                <option value="STT1">STT1</option>
+                <option value="DTST1">DTST1</option>
+                <option value="TST5">TST5</option>
+                <option value="DSE5">DSE5</option>
+                <option value="STT4">STT4</option>
+                <option value="TSI2">TSI2</option>
+                <option value="DELJ">DELJ</option>
+                <option value="TS05">TS05</option>
+                <option value="TS06">TS06</option>
+                <option value="STT3">STT3</option>
+                <option value="XYZ2">XYZ2</option>
+           </select>
+           <br>
+           <label for="tckid">Tracking ID:</label>
+           <input type="text" id="tckid">
+           <button id = "fetchTrackingId" class = "FetchTID">Fetch TID</button>
+           <br>
+           <label for="dropdown">Sort Zone:</label>
+           <select id="sortZone-selection-dropdown">
+                <option selected="selected" value="Select Sort Zone">Select Sort Zone</option>
+                <option value="F-1.2B">F-1.2B</option>
+                <option value="A-12.1A">A-12.1A</option>
+                <option value="A-12.W">A-12.W</option>
+                <option value="C1-1D">C1-1D</option>
+                <option value="A14-1A">A14-1A</option>
+                <option value="A14-W">A14-W</option>
+           </select>
+           <br>
+           <label for="dropdown">Delivery Associate:</label>
+           <select id="deliveryAssociate-selection-dropdown">
+                <option selected="selected" value="Select DA">Select DA</option>
+                <option value="A2EGOVTZDLNPGY">DA_US_TST2_A2EGOVTZDLNPGY</option>
+                <option value="A2R9QCPMF3QR7T">DA_US_TST1_A2R9QCPMF3QR7T</option>
+                <option value="A1YMQBJ93G3WTE">DA_UK_TST3_A1YMQBJ93G3WTE</option>
+                <option value="AK5H86HSFDJW6">DA_UK_XYZ1_AK5H86HSFDJW6</option>
+                <option value="AIWOV7F2Y7UW3">DA_IN_TSI2_AIWOV7F2Y7UW3</option>
+                <option value="A1W114AQ3VN739">DA_IN_TS05_A1W114AQ3VN739</option>
+           </select>
+           <br>
+           <label for="tridrts">TR ID:</label>
+           <input type="text" id="tridrts">
+           <button id = "fetchTrId" class = "FetchTrID">Fetch TrID</button>
+           <br>
+           <label for="dropdown">TR OBJECT STATE:</label>
+           <select id="trObjectState-selection-dropdown">
+                <option selected="selected" value="Select Tr Object State">Select Tr Object State</option>
+                <option value="PICKED_UP">PICKED_UP</option>
+                <option value="DELIVERY_ATTEMPTED">DELIVERY_ATTEMPTED</option>
+                <option value="REJECTED">REJECTED</option>
+                <option value="IN_TRANSIT">IN_TRANSIT</option>
+                <option value="DELIVERED">DELIVERED</option>
+           </select>
+           <br>
+           <label for="dropdown">TR OBJECT REASON:</label>
+           <select id="trObjectReason-selection-dropdown">
+                <option selected="selected" value="Select Tr Object Reason">Select Tr Object Reason</option>
+                <option value="NONE">NONE</option>
+                <option value="BUSINESS_CLOSED">BUSINESS_CLOSED</option>
+                <option value="ADDRESS_NOT_FOUND">ADDRESS_NOT_FOUND</option>
+                <option value="DAMAGED">DAMAGED</option>
+                <option value="OBJECT_MISSING">OBJECT_MISSING</option>
+                <option value="LATE_DELIVERY">LATE_DELIVERY</option>
+                <option value="NO_ITEMS_DELIVERED">NO_ITEMS_DELIVERED</option>
+                <option value="RESCHEDULED_BY_CUSTOMER">RESCHEDULED_BY_CUSTOMER</option>
+                <option value="CUSTOMER_UNAVAILABLE">CUSTOMER_UNAVAILABLE</option>
+                <option value="DEVICE_OUT_OF_BATTERY">DEVICE_OUT_OF_BATTERY</option>
+                <option value="DELIVERED_TO_SAFE_LOCATION">DELIVERED_TO_SAFE_LOCATION</option>
+                <option value="DELIVERED_TO_MAIL_ROOM">DELIVERED_TO_MAIL_ROOM</option>
+                <option value="DELIVERED_TO_LOCKER">DELIVERED_TO_LOCKER</option>
+                <option value="DELIVERED_TO_HOUSEHOLD_MEMBER">DELIVERED_TO_HOUSEHOLD_MEMBER</option>
+                <option value="DELIVERED_TO_MAIL_ROOM_CLERK">DELIVERED_TO_MAIL_ROOM_CLERK</option>
+                <option value="DELIVERED_TO_GARAGE">DELIVERED_TO_GARAGE</option>
+                <option value="DELIVERED_TO_CUSTOMER">DELIVERED_TO_CUSTOMER</option>
+                <option value="DELIVERED_TO_DELIVERY_STATION">DELIVERED_TO_DELIVERY_STATION</option>
+                <option value="DELIVERED_TO_PORCH">DELIVERED_TO_PORCH</option>
+                <option value="DELIVERED_TO_MAIL_SLOT">DELIVERED_TO_MAIL_SLOT</option>
+                <option value="DELIVERED_TO_NEIGHBOR">DELIVERED_TO_NEIGHBOR</option>
+                <option value="DELIVERED_TO_INSIDE_HOME">DELIVERED_TO_INSIDE_HOME</option>
+                <option value="DELIVERED_TO_RECEPTIONIST">DELIVERED_TO_RECEPTIONIST</option>
+                <option value="NO_SECURE_LOCATION">NO_SECURE_LOCATION</option>
+           </select>
+           <br>
+
+           <br>
+           <button id = "createAFNPackage" class = "Create AFN Package">Create AFN Package</button>
+           <button id = "SortZoneStubPackage" class = "Create AFN Package">Stub Package</button>
+           <button id = "getTrId" class = "button">Get TR Id</button>
+           <button id = "assignDA" class = "button2">Assign DA</button>
+           <button id = "pickuppackage" class = "button3">Pick Up</button>
+           <button id = "updatetrstatus" class = "button4">Update Status</button><br>
+
+           <p style="color:red;font-size:10px;">Reach out to @hdavisvi for queries and improvements.<br>Thank You :-)</p>
+           <br>
+       `;
+
+    var editor = ace.edit("request-input-editor");
+    var selectedOption;
+    var extractTR ="";
+    var trIds= new Array();
+
+    const explorerOptionFrom = document.getElementById('explorer-options');
+    //historyElement.parentNode.insertBefore(inputDiv,historyElement);
+    explorerOptionFrom.insertBefore(inputDiv,explorerOptionFrom.children[3]);
+
+    var testDataTypedropDownSelection = document.getElementById('testDataType-selection-dropdown');
+    var nodeiddropDownSelection = document.getElementById('station-selection-dropdown');
+    var countrycodedropDownSelection = document.getElementById('country-selection-dropdown');
+
+    var packageidtextboxvalue = document.getElementById('tckid');
+    var fetchTrackingID = document.getElementById('fetchTrackingId');
+    var sortZoneSelectionDD = document.getElementById('sortZone-selection-dropdown');
+    var stubPackageButton = document.getElementById('SortZoneStubPackage');
+    var getTRIdforTrackingId = document.getElementById('getTrId');
+    var assignDeliveryAssociate = document.getElementById('assignDA');
+    var tridtextboxvalue = document.getElementById('tridrts');
+    var dAdropDownSelection = document.getElementById('deliveryAssociate-selection-dropdown');
+    var fetchTrIDofTrackingId = document.getElementById('fetchTrId');
+    var trObjectStatusValue = document.getElementById('trObjectState-selection-dropdown');
+    var trObjectReasonValue = document.getElementById('trObjectReason-selection-dropdown');
+    var pickUpPackage = document.getElementById('pickuppackage');
+    var updateStatusOfPackage = document.getElementById('updatetrstatus');
+
+
+    var createAFNPackage = document.getElementById('createAFNPackage');
+
+    testDataTypedropDownSelection.addEventListener('change', function() {
+        selectedOption = document.getElementById('testDataType-selection-dropdown').value;
+        console.log("Selected Value Change:",selectedOption);
+        if (selectedOption === "AFN") {
+            sortZoneSelectionDD.disabled = true;
+            stubPackageButton.disabled = true;
+            getTRIdforTrackingId.disabled = true;
+            assignDeliveryAssociate.disabled = true;
+            tridtextboxvalue.disabled = true;
+            fetchTrIDofTrackingId.disabled = true;
+            dAdropDownSelection.disabled = true;
+            trObjectStatusValue.disabled = true;
+            trObjectReasonValue.disabled = true;
+            pickUpPackage.disabled = true;
+            updateStatusOfPackage.disabled = true;
+        }
+    });
+
+    testDataTypedropDownSelection.addEventListener('change', function() {
+        selectedOption = document.getElementById('testDataType-selection-dropdown').value;
+        console.log("Selected Value Change:",selectedOption);
+        if (selectedOption === "Stubbing") {
+            sortZoneSelectionDD.disabled = false;
+            stubPackageButton.disabled = false;
+            getTRIdforTrackingId.disabled = true;
+            assignDeliveryAssociate.disabled = true;
+            tridtextboxvalue.disabled = true;
+            fetchTrIDofTrackingId.disabled = true;
+            dAdropDownSelection.disabled = true;
+            trObjectStatusValue.disabled = true;
+            trObjectReasonValue.disabled = true;
+            pickUpPackage.disabled = true;
+            updateStatusOfPackage.disabled = true;
+        }
+    });
+
+    testDataTypedropDownSelection.addEventListener('change', function() {
+        selectedOption = document.getElementById('testDataType-selection-dropdown').value;
+        console.log("Selected Value Change:",selectedOption);
+        if (selectedOption === "RTS/Depart") {
+            getTRIdforTrackingId.disabled = false;
+            assignDeliveryAssociate.disabled = false;
+            tridtextboxvalue.disabled = false;
+            fetchTrIDofTrackingId.disabled = false;
+            dAdropDownSelection.disabled = false;
+            trObjectStatusValue.disabled = false;
+            trObjectReasonValue.disabled = false;
+            pickUpPackage.disabled = false;
+            updateStatusOfPackage.disabled = false;
+        }
+    });
+
+    createAFNPackage.addEventListener('click', function() {
+        nodeiddropDownSelection = document.getElementById('station-selection-dropdown').value;
+        countrycodedropDownSelection = document.getElementById('country-selection-dropdown').value;
+        if (nodeiddropDownSelection === "Select Station") {
+            alert('Select STATION');
+        }
+        if (countrycodedropDownSelection === "Select Country") {
+            alert('Select COUNTRY');
+        }
+        else {
+
+            createAFNhandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function createAFNhandleButtonClick() {
+            // Get user inputs
+            countrycodedropDownSelection = document.getElementById('country-selection-dropdown').value;
+            console.log(countrycodedropDownSelection);
+            nodeiddropDownSelection = document.getElementById('station-selection-dropdown').value;
+            console.log(nodeiddropDownSelection);
+            //text1Value = document.getElementById('text1').value;
+            //trCount = document.getElementById('text4').value.trim();
+
+            function afnPackageCreationPayloadUS() {
+                let afnPackageCreationPayloadUS = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMCreateFakeAFNShipment\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"shipmentDetails\": { \n" +
+                         "\"stationId\": \""+ nodeiddropDownSelection +"\",\n" +
+                         "\"destinationAddressId\": \"RVMECFKSZIFCFESRUGJKFIWSVI5JVKNKRGZETOSZSKFCEMVRSKQ3FCA3G16F3QKS\",\n" +
+                         "\"destinationLegacyAddressId\": \"43655878215\",\n" +
+                         "\"destinationPostalCode\": \"40211\",\n" +
+                         "\"shipCarrierId\": \"AMZN_US\",\n" +
+                         "\"scac\": \"AMAUS\",\n" +
+                         "\"shipMethod\": \"AMZN_US_PRIME\"\n" +
+                     "}}}\n";
+                return afnPackageCreationPayloadUS;
+            }
+
+            function afnPackageCreationPayloadUK() {
+                let afnPackageCreationPayloadUK = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMCreateFakeAFNShipment\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"shipmentDetails\": { \n" +
+                         "\"stationId\": \""+ nodeiddropDownSelection +"\",\n" +
+                         "\"destinationAddressId\": \"F3MIGLQKBZXSAQJCGH64G133HQMAMWRE1SAS1ERWMAMQH38PXTQ2EIA2OXXEQ3KB\",\n" +
+                         "\"destinationLegacyAddressId\": \"27054477835\",\n" +
+                         "\"destinationPostalCode\": \"HD8 8LU\",\n" +
+                         "\"shipCarrierId\": \"AMZN_UK\",\n" +
+                         "\"scac\": \"AMAUK\",\n" +
+                         "\"shipMethod\": \"AMZN_UK_PRIME\"\n" +
+                     "}}}\n";
+                return afnPackageCreationPayloadUK;
+            }
+
+            function afnPackageCreationPayloadIN() {
+                let afnPackageCreationPayloadIN = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMCreateFakeAFNShipment\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"shipmentDetails\": { \n" +
+                         "\"stationId\": \""+ nodeiddropDownSelection +"\",\n" +
+                         "\"destinationAddressId\": \"3VTXL4CY437426WYLQYEG12Y7XBRNWLIKA29KILWNRBX7Y6PXTQ2EIA2OXYKBIA2\",\n" +
+                         "\"destinationLegacyAddressId\": \"108500397313\",\n" +
+                         "\"destinationPostalCode\": \"411057\",\n" +
+                         "\"shipCarrierId\": \"ATS\",\n" +
+                         "\"scac\": \"ATSIN\",\n" +
+                         "\"realm\": \"INAmazon\",\n" +
+                         "\"shipMethod\": \"ATS_STANDARD\"\n" +
+                     "}}}\n";
+                return afnPackageCreationPayloadIN;
+            }
+
+            if (countrycodedropDownSelection === "Select Country") {
+                alert('Select Country');
+            }
+            else
+            {
+                switch (countrycodedropDownSelection){
+
+                    case "US":
+                        editor.session.setValue(afnPackageCreationPayloadUS());
+                        break;
+
+                    case "UK":
+                        editor.session.setValue(afnPackageCreationPayloadUK());
+                        break;
+
+                    case "IN":
+                        editor.session.setValue(afnPackageCreationPayloadIN());
+                        break;
+
+                }
+            }
+        }
+    });
+
+    stubPackageButton.addEventListener('click', function() {
+        packageidtextboxvalue = document.getElementById('tckid').value;
+        if (packageidtextboxvalue === "") {
+            alert('Enter Tracking Id');
+        }
+        else {
+
+            stubbinghandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function stubbinghandleButtonClick() {
+            // Get user inputs
+            sortZoneSelectionDD = document.getElementById('sortZone-selection-dropdown').value;
+            console.log(sortZoneSelectionDD);
+
+            function stubbingPayload() {
+                let stubbingPayload = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#UpdateRouteAndSortZones\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"trackingIds\": [ \""+packageidtextboxvalue+"\"],\n" +
+                    "\"routeZone\": \"CYCLE_1\",\n" +
+                    "\"sortZone\": \""+sortZoneSelectionDD+"\",\n" +
+                    "\"sequenceIdentifier\": {\n" +
+                    "\"expectedExecutionOrder\": 1994\n" +
+                    "}}}\n";
+                return stubbingPayload;
+            }
+
+            if (sortZoneSelectionDD === "Select Sort Zone") {
+                alert('Select Sort Zone');
+            }
+            else
+            {
+                editor.session.setValue(stubbingPayload());
+            }
+        }
+    });
+
+    //TRID
+
+    getTRIdforTrackingId.addEventListener('click', function() {
+        packageidtextboxvalue = document.getElementById('tckid').value;
+        if (packageidtextboxvalue === "") {
+            alert('Enter Tracking Id');
+        }
+        else {
+
+            getTRhandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function getTRhandleButtonClick() {
+            // Get user inputs
+            packageidtextboxvalue = document.getElementById('tckid').value.trim();
+            console.log(packageidtextboxvalue);
+
+            function gettridPayload() {
+                let gettridPayload = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMGetTRsByScannableId\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"scannableId\": \""+packageidtextboxvalue+"\" \n" +
+                    "}}\n";
+                return gettridPayload;
+            }
+
+            if (packageidtextboxvalue === "") {
+                alert('Enter Tracking Id');
+            }
+            else
+            {
+                editor.session.setValue(gettridPayload());
+            }
+        }
+    });
+
+
+    assignDeliveryAssociate.addEventListener('click', function() {
+        tridtextboxvalue = document.getElementById('tridrts').value.trim();
+        dAdropDownSelection = document.getElementById('deliveryAssociate-selection-dropdown').value;
+        if (tridtextboxvalue === "") {
+            alert('Enter Tr Id');
+        }
+        if (dAdropDownSelection === "Select DA") {
+            alert('Select DA');
+        }
+        else {
+            assignDAhandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function assignDAhandleButtonClick() {
+            // Get user inputs
+            tridtextboxvalue = document.getElementById('tridrts').value.trim();
+            dAdropDownSelection = document.getElementById('deliveryAssociate-selection-dropdown').value;
+            console.log(tridtextboxvalue);
+            console.log(dAdropDownSelection);
+
+            function assignDAPayload() {
+                let assignDAPayload = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMBeginTRsExecution\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"trIds\": [ \""+tridtextboxvalue+"\"],\n" +
+                    "\"transporterId\": \""+dAdropDownSelection+"\"\n" +
+                    "}}\n";
+                return assignDAPayload;
+            }
+
+            if (dAdropDownSelection === "Select DA") {
+                alert('Select DA');
+            }
+            else
+            {
+                editor.session.setValue(assignDAPayload());
+            }
+        }
+    });
+
+
+    pickUpPackage.addEventListener('click', function() {
+        tridtextboxvalue = document.getElementById('tridrts').value.trim();
+        if (tridtextboxvalue === "") {
+            alert('Enter Tr Id');
+        }
+        else {
+            pickUphandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function pickUphandleButtonClick() {
+            // Get user inputs
+            tridtextboxvalue = document.getElementById('tridrts').value.trim();
+            console.log(tridtextboxvalue);
+
+            function pickupPayload() {
+                let pickupPayload = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMUpdateFakeTRs\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"updateFakeTRsList\":\n" +
+                    "[{\"trId\": \""+tridtextboxvalue+"\",\n" +
+                    "\"trState\": \"OPEN\",\n" +
+                    "\"trObjectState\": \"PICKED_UP\",\n" +
+                    "\"trObjectReason\": \"NONE\",\n" +
+                    "\"signatureID\": \"foo\",\n" +
+                    "\"failureExpected\": true,\n" +
+                    "\"validatecall\": true}]\n" +
+                    "}}\n";
+                return pickupPayload;
+            }
+
+            if (tridtextboxvalue === "") {
+                alert('Enter Tr Id');
+            }
+            else
+            {
+                editor.session.setValue(pickupPayload());
+            }
+        }
+    });
+
+    updateStatusOfPackage.addEventListener('click', function() {
+        tridtextboxvalue = document.getElementById('tridrts').value.trim();
+        if (tridtextboxvalue === "") {
+            alert('Enter Tr Id');
+        }
+        else {
+            statusUpdatehandleButtonClick ();
+            document.getElementById('start_button').click();
+        }
+
+        function statusUpdatehandleButtonClick() {
+            // Get user inputs
+            tridtextboxvalue = document.getElementById('tridrts').value.trim();
+            trObjectStatusValue = document.getElementById('trObjectState-selection-dropdown').value;
+            trObjectReasonValue = document.getElementById('trObjectReason-selection-dropdown').value;
+            console.log(tridtextboxvalue);
+            console.log(trObjectStatusValue);
+            console.log(trObjectReasonValue);
+
+            function packageStatusUpdatePayload() {
+                let packageStatusUpdatePayload = "{\n" +
+                    "\"Operation\": \"com.amazon.stationtesttoolsservice#RTMUpdateFakeTRs\",\n" +
+                    "\"Service\": \"com.amazon.stationtesttoolsservice#StationTestToolsService\",\n" +
+                    "\"Input\": { \n" +
+                    "\"updateFakeTRsList\":\n" +
+                    "[{\"trId\": \""+tridtextboxvalue+"\",\n" +
+                    "\"trState\": \"OPEN\",\n" +
+                    "\"trObjectState\": \""+trObjectStatusValue+"\",\n" +
+                    "\"trObjectReason\": \""+trObjectReasonValue+"\",\n" +
+                    "\"signatureID\": \"foo\",\n" +
+                    "\"failureExpected\": true,\n" +
+                    "\"validatecall\": true}]\n" +
+                    "}}\n";
+                return packageStatusUpdatePayload;
+            }
+
+            if (trObjectStatusValue === "Select Tr Object State") {
+                alert('Select Tr Object State');
+            }
+            if (trObjectReasonValue === "Select Tr Object Reason") {
+                alert('Select Tr Object Reason');
+            }
+            else
+            {
+                editor.session.setValue(packageStatusUpdatePayload());
+            }
+        }
+    });
+
+    fetchTrackingID.addEventListener('click', function() {
+        var responseData = document.getElementById('response-editor').innerText;
+        console.log(responseData);
+        if(responseData.includes("trackingId")){
+            const fetchedDataArray = responseData.split("\"");
+            console.log(fetchedDataArray);
+            var requiredpckidfield = fetchedDataArray[21];
+            console.log(requiredpckidfield);
+            document.getElementById('tckid').value = requiredpckidfield;
+        }
+    });
+
+    fetchTrIDofTrackingId.addEventListener('click', function() {
+        var responseData = document.getElementById('response-editor').innerText;
+        console.log(responseData);
+        if(responseData.includes("\"id\"")){
+            const fetchedDataArray = responseData.split("\"id\"");
+            console.log(fetchedDataArray);
+            const fetchedDataArray2 = fetchedDataArray[1].split("\"");
+            console.log(fetchedDataArray2);
+            var requiredpckidfield = fetchedDataArray2[1];
+            console.log(requiredpckidfield);
+            document.getElementById('tridrts').value = requiredpckidfield;
+        }
+    });
+
+
+
+})();
